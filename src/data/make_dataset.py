@@ -1,19 +1,18 @@
 import urllib.request
 from torch.utils.data import Dataset
 from pathlib import Path
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import os
 
-data_dir = Path(__file__).parent.parent.joinpath("data")
-
-def download_from_url(url: str, path: str = data_dir.joinpath("external")):
-    urllib.request.urlretrieve(path)
-
-class ParaNMTDataset(Dataset):
-    def __init__(self, path: Path, **pd_kwargs):
-        self.data = pd.read_csv(path, pd_kwargs)
+def train_test_split(df: pd.DataFrame, train_ratio: float = 0.8, shuffle = False):
+    ...
     
-    def _preprocess(data):
-        self.texts = self.data[]
-        
-        
+def read_data(path: str, **pd_kwargs):
+    ...
+
+def save_data(path: str):
+    ...
+
+if __name__ == '__main__':
+    ...
