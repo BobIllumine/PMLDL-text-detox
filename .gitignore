@@ -1,3 +1,6 @@
 *.tsv
 *.zip
 *.csv
+/data/interim/condbert_vocab/train
+/data/interim/condbert_vocab/test
+__pycache__
