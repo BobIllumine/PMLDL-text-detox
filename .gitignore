@@ -1,6 +1,9 @@
 *.tsv
 *.zip
 *.csv
+*.txt
+*.pkl
 /data/interim/condbert_vocab/train
 /data/interim/condbert_vocab/test
+/data/interim/outputs
 __pycache__

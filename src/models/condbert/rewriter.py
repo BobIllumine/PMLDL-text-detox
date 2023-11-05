@@ -51,9 +51,9 @@ class CondBERTRewriter:
         if bad_words is None:
             bad_words = self.neg_words if target == 0 else self.pos_words
             
-        sentences = [self.tokenizer.encode(tokens, add_special_tokens=False)]
+        sentences = [self.tokenizer.encode(tokens, add_special_tokens=True)]
         sentences_torch = torch.tensor(sentences).to(self.device)
-        masks = torch.zeros_like(sentences)
+        masks = torch.zeros_like(sentences_torch)
         
         for sent_id, sent in enumerate(sentences):
             for token_id, token in enumerate(sent):
@@ -63,18 +63,18 @@ class CondBERTRewriter:
                         for step in range(n):
                             masks[sent_id, token_id + step] = 1
                         for offset, next in enumerate(sent[token_id + n : ]):
-                            if self.tokenizer.convert_tokens_to_ids(next).startswith('##'):
+                            if self.tokenizer.convert_ids_to_tokens(next).startswith('##'):
                                 masks[sent_id, token_id + n + offset] = 1
                             else:
                                 break
-            if sum(masks[sent_id].numpy()) == 0 and aggressive:
+            if sum(masks[sent_id].cpu().numpy()) == 0 or aggressive:
                 scored = []
                 for idx, word in self.merge_subtokens(sent):
                     score = self.word2coef.get(word, 0) * (1 - 2 * target)
                     if score:
                         scored.append([idx, word, score])
                 if scored:
-                    max_score = max([s[2] for s in scored])
+                    max_score = max(s[2] for s in scored)
                     if max_score > min_bad_score:
                         for idx, word, score in scored:
                             if score >= max(min_bad_score, max_score * max_bad_score):
@@ -83,11 +83,13 @@ class CondBERTRewriter:
         return sentences_torch, masks
     
     def convert_mask(self, token_ids, mask_ids, duplicate=False, start_from=0):
-        temp_tokens = [self.vocab.convert_ids_to_tokens(token_ids[0])[1:-1]]
+        temp_tokens = [self.tokenizer.convert_ids_to_tokens(token_ids[0])[1:-1]]
         mask_pos = None
         tokens, mask_tokens, masked = [], [], False
+        
         for i, is_masked in enumerate(mask_ids[0][1:-1]):
             token = temp_tokens[0][i]
+            
             if not masked:
                 if is_masked and i >= start_from and not token.startswith('##'):
                     masked = True
@@ -100,6 +102,7 @@ class CondBERTRewriter:
                     break
                 else:
                     mask_tokens.append(token)
+                    
         tokens = [tokens]
         if duplicate:
             tokens = [temp_tokens[0] + ['[SEP]'] + tokens[0]]
@@ -126,8 +129,8 @@ class CondBERTRewriter:
             if mask_pos is None:
                 return generated_text
             texts, scores = predictor.generate(tokens, mask_pos, 
-                                               n_tokens=n_tokens, n_top=n_top, 
-                                               fix_multiunit=False, mask_token=mask_token, 
+                                               n_tokens=list(n_tokens), n_top=n_top, 
+                                               fix_multiunit=True, mask_token=mask_token, 
                                                target=target, **pred_args)
             prev_replacement = chooser(hypotheses=texts[0], scores=scores[0], original=mask_tokens)
             if isinstance(prev_replacement, str):

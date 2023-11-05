@@ -4,8 +4,8 @@ from flair.data import Sentence
 from flair.embeddings import WordEmbeddings
 
 
-def cosine(x1, x2):
-    return np.dot(x1, x2) / (np.linalg.norm(x1) * np.linalg.norm(x2))
+def cosine(v1, v2):
+    return np.dot(v1, v2) / np.sqrt(sum(v1 ** 2) * sum(v2 ** 2) + 1e-10)
 
 class SimilarityChooser:
     def __init__(self, coeff=100, tokenizer=None):
@@ -15,7 +15,7 @@ class SimilarityChooser:
     
     def embed(self, text):
         tokens = self.embedding.embed(Sentence(text))[0]
-        return tokens if tokens is not None else np.zeros(self.embedding.embedding_length)
+        return np.mean([t.embedding.cpu().numpy() for t in tokens], axis=0) if tokens else np.zeros(self.embedding.embedding_length)
     
     def decode(self, tokens):
         if isinstance(tokens, str):
@@ -26,7 +26,8 @@ class SimilarityChooser:
     
     def __call__(self, hypotheses, original=None, scores=None):
         embedded = self.embed(self.decode(original))
-        nominees = sorted([
+        nominees = [
             (hypothesis, score, cosine(embedded, self.embed(self.decode(hypothesis)))) for hypothesis, score in zip(hypotheses, scores)
-        ], key=lambda x: x[1] + x[2] * self.coeff, reverse=True)
+        ]
+        nominees = sorted(nominees, key=lambda x: x[1] + x[2] * self.coeff, reverse=True)
         return nominees[0][0]
