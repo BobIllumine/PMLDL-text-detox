@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--classifier_path", default='SkolkovoInstitute/roberta_toxicity_classifier')
     parser.add_argument("--threshold", default=0.8, type=float)
 
-    parser.add_argument("--cola_classifier_path", default='models/cola')
+    parser.add_argument("--cola_classifier_path", default='')
     parser.add_argument("--cola_checkpoint", default='checkpoint_best.pt')
     parser.add_argument("--batch_size", default=32, type=int)
 

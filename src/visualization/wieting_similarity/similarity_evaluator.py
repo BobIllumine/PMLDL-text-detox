@@ -10,15 +10,16 @@ from .sim_models import WordAveraging
 from .sim_utils import Example
 from nltk.tokenize import TreebankWordTokenizer
 import sentencepiece as spm
-
+from pathlib import Path
 
 class SimilarityEvaluator:
     def __init__(
         self,
-        model_path='models/sim/sim.pt',
-        tokenizer_path='models/sim/sim.sp.30k.model',
+        model_path=str(Path(__file__).parent / 'models/sim/sim.pt'),
+        tokenizer_path=str(Path(__file__).parent / 'models/sim/sim.sp.30k.model'),
         gpu=False
     ):
+        print()
         self.model_path = model_path
         self.tokenizer_path = tokenizer_path
         self.tok = TreebankWordTokenizer()
