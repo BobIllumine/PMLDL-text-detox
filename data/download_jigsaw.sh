@@ -1,7 +1,16 @@
 #!/usr/bin/bash
-CONDBERT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/interim/condbert_vocab"
+CONDBERT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/interim"
+if [[ ! -d "${CONDBERT_DIR}/condbert_vocab" ]]; then
+    mkdir -p "${CONDBERT_DIR}/condbert_vocab"
+fi
 TRAIN_DIR="${CONDBERT_DIR}/train"
+if [[ ! -d "${TRAIN_DIR}" ]]; then
+    mkdir -p "${TRAIN_DIR}"
+fi
 TEST_DIR="${CONDBERT_DIR}/test"
+if [[ ! -d "${TEST_DIR}" ]]; then
+    mkdir -p "${TEST_DIR}"
+fi
 TRAIN_NAME_TOXIC="${TRAIN_DIR}/train_toxic"
 TRAIN_NAME_NEUTRAL="${TRAIN_DIR}/train_normal"
 TEST_NAME_TOXIC="${TEST_DIR}/test_10k_toxic"

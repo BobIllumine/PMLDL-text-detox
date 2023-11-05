@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 RAW_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/raw"
+
+if [[ ! -d "${RAW_DIR}" ]]; then
+    mkdir -p "${RAW_DIR}"
+fi
+
 ARCHIVE_NAME="${RAW_DIR}/filtered_paranmt.zip"
 FILE_NAME="${RAW_DIR}/filtered.tsv"
 
